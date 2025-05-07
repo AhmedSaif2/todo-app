@@ -1,0 +1,21 @@
+@media only screen and (max-width: 768px) {
+  .task-list,.new-task{
+      width: 16rem;
+  }
+  .card-body .action-buttons{
+        flex-direction: column;
+  }
+}
+@media only screen and (max-width: 550px) {
+    .task-list,.new-task{
+        width: 22rem;
+    }
+    body .container{
+        justify-content: center !important;
+    }
+}
+@media only screen and (max-width: 380px) {
+    .task-list,.new-task{
+        width: 18rem;
+    }
+}
