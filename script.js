@@ -31,7 +31,7 @@ function addTaskToDom(title,description,status) {
         <div class="card-body">
             <h5 class="card-title">${title}</h5>
             <p class="card-text">${description}</p>
-            <div class="d-flex justify-content-around">
+            <div class="action-buttons d-flex justify-content-around">
                 <button class="btn move-btn ${buttonColor}">Move To ${moveStatus}</button>
                 <button class="btn btn-danger delete-btn">Delete</button>
             </div>
