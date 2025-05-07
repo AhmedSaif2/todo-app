@@ -1,19 +1,51 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+import { getFirestore, doc, collection, addDoc, deleteDoc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
 
-addTaskToDom("Task 1","Description 1","Completed");
-addTaskToDom("Task 2","Description 2","Pending");
+const firebaseConfig = {
+    apiKey: "AIzaSyB_2KgPy79ldEyJalYhNVUWDROq57DGPTg",
+    authDomain: "todo-app-29cd9.firebaseapp.com",
+    projectId: "todo-app-29cd9",
+    storageBucket: "todo-app-29cd9.firebasestorage.app",
+    messagingSenderId: "225424018886",
+    appId: "1:225424018886:web:fc9c973909797e7de176c7",
+    measurementId: "G-6GJXLCFPP7"
+};
 
-document.getElementById('task-form').addEventListener('submit', addTask);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-document.getElementById('completed-search').addEventListener('submit', function(event) {
-    searchTasks(event, 'completed-search','Completed');
-});
+async function fetchTasks() {
+  const taskList = document.getElementById("pending-tasks");
+  taskList.innerHTML = "";
+  const querySnapshot = await getDocs(collection(db, "tasks"));
+  console.log(querySnapshot);
+  querySnapshot.forEach((doc) => {
+    addTaskToDom(doc.data().title, doc.data().description, doc.data().status,doc.id);
+  });
+}
 
-document.getElementById('pending-search').addEventListener('submit', function(event) {
-    searchTasks(event,'pending-search', 'Pending');
-});
+async function addTask(event){
+    event.preventDefault();
+    let title = document.forms['task-form']['title'].value;
+    let description = document.forms['task-form']['description'].value;
+    let status = document.forms['task-form']['status'].value;
 
-function addTaskToDom(title,description,status) {
+    try {
+        let newDocRef = doc(collection(db, "tasks"));
+        await setDoc(newDocRef, {
+           title: title,
+           description: description,
+           status: status
+        });
+        addTaskToDom(title,description,status,newDocRef.id);
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
+}
 
+
+function addTaskToDom(title,description,status,id) {
     let newTask=document.createElement('div');
     newTask.className="card bg-light";
     let parent, moveStatus, buttonColor;
@@ -41,6 +73,7 @@ function addTaskToDom(title,description,status) {
     const deleteBtn = newTask.querySelector('.delete-btn');
     deleteBtn.addEventListener('click', function () {
         newTask.remove();
+        deleteDoc(doc(db, "tasks", id));
     });
     const moveBtn = newTask.querySelector('.move-btn');
     moveBtn.addEventListener('click', function () {
@@ -61,19 +94,15 @@ function addTaskToDom(title,description,status) {
         newTask.remove();
         newTask.querySelector('.move-btn').classList.add(buttonColor);
         newTask.querySelector('.move-btn').innerText=`Move To ${moveStatus}`;
+        setDoc(doc(db, "tasks", id), {
+                    title: title,
+                    description: description,
+                    status: status
+                });
         parent.appendChild(newTask);
     });
 }
 
-function addTask(event) {
-    event.preventDefault();
-    // Get form values
-    let title = document.forms['task-form']['title'].value;
-    let description = document.forms['task-form']['description'].value;
-    let status = document.forms['task-form']['status'].value;
-
-    addTaskToDom(title,description,status);
-}
 
 function searchTasks(event,searchId,status) {
     event.preventDefault();
@@ -85,7 +114,6 @@ function searchTasks(event,searchId,status) {
     else if (status=="Pending") {
         tasks= document.getElementById('pending-tasks').getElementsByClassName('card-title');
     }
-    console.log(tasks)
     for (let i = 0; i < tasks.length; i++) {
         let taskTitle = tasks[i].innerText.toLowerCase();
         if (taskTitle.includes(searchText)) {
@@ -94,5 +122,18 @@ function searchTasks(event,searchId,status) {
             tasks[i].parentElement.parentElement.style.display = "none";
         }
     }
-
 }
+
+window.onload = () => {
+    document.getElementById('task-form').addEventListener('submit', addTask);
+    document.getElementById('completed-search').addEventListener('submit', function(event) {
+        searchTasks(event, 'completed-search','Completed');
+    });
+
+    document.getElementById('pending-search').addEventListener('submit', function(event) {
+        searchTasks(event,'pending-search', 'Pending');
+    });
+
+    fetchTasks();
+}
+
