@@ -28,17 +28,22 @@ async function fetchTasks() {
 async function addTask(event){
     event.preventDefault();
     let title = document.forms['task-form']['title'].value;
+    if (title == "") {
+        alert("Please enter a title");
+        return;
+    }
     let description = document.forms['task-form']['description'].value;
     let status = document.forms['task-form']['status'].value;
 
     try {
         let newDocRef = doc(collection(db, "tasks"));
+        addTaskToDom(title,description,status,newDocRef.id);
+        document.forms['task-form'].reset();
         await setDoc(newDocRef, {
            title: title,
            description: description,
            status: status
         });
-        addTaskToDom(title,description,status,newDocRef.id);
     } catch (e) {
         console.error("Error adding document: ", e);
     }
