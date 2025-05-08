@@ -11,15 +11,10 @@ const firebaseConfig = {
     measurementId: "G-6GJXLCFPP7"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
 async function fetchTasks() {
   const taskList = document.getElementById("pending-tasks");
   taskList.innerHTML = "";
   const querySnapshot = await getDocs(collection(db, "tasks"));
-  console.log(querySnapshot);
   querySnapshot.forEach((doc) => {
     addTaskToDom(doc.data().title, doc.data().description, doc.data().status,doc.id);
   });
@@ -49,10 +44,11 @@ async function addTask(event){
     }
 }
 
-
 function addTaskToDom(title,description,status,id) {
     let newTask=document.createElement('div');
-    newTask.className="card bg-light";
+    newTask.id = id;
+    newTask.className=`card bg-light ${status}-task`;
+    newTask.draggable="true";
     let parent, moveStatus, buttonColor;
     if (status=="Completed") {
         parent=document.getElementById('completed-tasks');
@@ -106,8 +102,10 @@ function addTaskToDom(title,description,status,id) {
                 });
         parent.appendChild(newTask);
     });
+    newTask.addEventListener('dragstart', function(event) {
+        event.dataTransfer.setData("text", event.target.id);
+    });
 }
-
 
 function searchTasks(event,searchId,status) {
     event.preventDefault();
@@ -119,26 +117,65 @@ function searchTasks(event,searchId,status) {
     else if (status=="Pending") {
         tasks= document.getElementById('pending-tasks').getElementsByClassName('card-title');
     }
-    for (let i = 0; i < tasks.length; i++) {
-        let taskTitle = tasks[i].innerText.toLowerCase();
+    for (const element of tasks) {
+        let taskTitle = element.innerText.toLowerCase();
         if (taskTitle.includes(searchText)) {
-            tasks[i].parentElement.parentElement.style.display = "block";
+            element.parentElement.parentElement.style.display = "block";
         } else {
-            tasks[i].parentElement.parentElement.style.display = "none";
+            element.parentElement.parentElement.style.display = "none";
         }
     }
 }
 
-window.onload = () => {
-    document.getElementById('task-form').addEventListener('submit', addTask);
-    document.getElementById('completed-search').addEventListener('submit', function(event) {
-        searchTasks(event, 'completed-search','Completed');
-    });
+function dragoverHandler(event) {
+    event.preventDefault();
+};
+function dropHandler(event) {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text");
+    const task = document.getElementById(data);
+    if (this.contains(task)) {
+        return;
+    }
+    const taskId = task.querySelector('.card-title').innerText;
+    const taskDescription = task.querySelector('.card-text').innerText;
+    let taskStatus;
+    if (task.classList.contains('Pending-task')) {
+        taskStatus = "Completed";
+    }
+    else if (task.classList.contains('Completed-task')) {
+        taskStatus = "Pending";
+    }
 
-    document.getElementById('pending-search').addEventListener('submit', function(event) {
-        searchTasks(event,'pending-search', 'Pending');
+    task.remove();
+    addTaskToDom(taskId,taskDescription,taskStatus,data);
+    deleteDoc(doc(db, "tasks", data));
+    setDoc(doc(db, "tasks", data), {
+        title: taskId,
+        description: taskDescription,
+        status: taskStatus
     });
-
-    fetchTasks();
 }
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById('task-form').addEventListener('submit', addTask);
+document.getElementById('completed-search').addEventListener('submit', function(event) {
+    searchTasks(event, 'completed-search','Completed');
+});
+
+document.getElementById('pending-search').addEventListener('submit', function(event) {
+    searchTasks(event,'pending-search', 'Pending');
+});
+
+let pending = document.getElementById('pending-container');
+pending.addEventListener('dragover', dragoverHandler);
+pending.addEventListener('drop', dropHandler);
+
+let completed = document.getElementById('completed-container');
+completed.addEventListener('dragover', dragoverHandler);
+completed.addEventListener('drop', dropHandler);
+
+fetchTasks();
 
