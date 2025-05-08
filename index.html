@@ -62,12 +62,20 @@
                     <h2>New Task</h2>
                     <input type="text" class="form-control shadow-none mb-3" name="title" placeholder="Enter task title">
                     <textarea class="form-control shadow-none mb-3" name="description" placeholder="Enter task description" rows="3"></textarea>
-                    <select class="form-select shadow-none" name="status" >
+                    <select class="form-select shadow-none mb-3" name="status" >
                         <option>Pending</option>
                         <option>Completed</option>
                     </select>
+                    <label for="priority" class="form-label">Priority</label>
+                    <div class="d-flex justify-content-between  mb-3">
+                        <select class="form-select w-70 shadow-none" name="priority" id="priority">
+                            <option>low</option>
+                            <option>medium</option>
+                            <option>high</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-100 btn btn-primary mb-3">Add</button>
                 </div>
-                <button type="submit" class="w-100 btn btn-primary mb-3">Add</button>
             </form>
         </div>
     </div>

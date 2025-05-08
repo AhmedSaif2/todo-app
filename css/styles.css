@@ -19,6 +19,18 @@ body {
     padding: 0.7rem;
     margin-bottom: 1rem;
 }
+.low-priority{
+    width: 35%;
+    background-color: #A3B18A;
+}
+.medium-priority{
+    width: 35%;
+    background-color: #2980B9;
+}
+.high-priority{
+    width: 35%;
+    background-color: #8E44AD ;
+}
 .card .Pending-task:hover , .card .Completed-task:hover{
     cursor: grabbing;
     transform: translateY(-5px);

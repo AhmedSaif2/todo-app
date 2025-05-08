@@ -16,7 +16,7 @@ async function fetchTasks() {
   taskList.innerHTML = "";
   const querySnapshot = await getDocs(collection(db, "tasks"));
   querySnapshot.forEach((doc) => {
-    addTaskToDom(doc.data().title, doc.data().description, doc.data().status,doc.id);
+    addTaskToDom(doc.data(),doc.id);
   });
 }
 
@@ -29,41 +29,50 @@ async function addTask(event){
     }
     let description = document.forms['task-form']['description'].value;
     let status = document.forms['task-form']['status'].value;
+    let priority = document.forms['task-form']['priority'].value;
 
     try {
         let newDocRef = doc(collection(db, "tasks"));
-        addTaskToDom(title,description,status,newDocRef.id);
+        let task = {
+            title: title,
+            description: description,
+            status: status,
+            priority: priority
+        }
+        addTaskToDom(task,newDocRef.id);
         document.forms['task-form'].reset();
         await setDoc(newDocRef, {
            title: title,
            description: description,
-           status: status
+           status: status,
+           priority: priority
         });
     } catch (e) {
         console.error("Error adding document: ", e);
     }
 }
 
-function addTaskToDom(title,description,status,id) {
+function addTaskToDom(task,id) {
     let newTask=document.createElement('div');
     newTask.id = id;
-    newTask.className=`card bg-light ${status}-task`;
+    newTask.className=`card bg-light ${task.status}-task`;
     newTask.draggable="true";
     let parent, moveStatus, buttonColor;
-    if (status=="Completed") {
+    if (task.status=="Completed") {
         parent=document.getElementById('completed-tasks');
         moveStatus="Pending";
         buttonColor="btn-outline-warning";
     }
-    else if (status=="Pending") {
+    else if (task.status=="Pending") {
         parent=document.getElementById('pending-tasks');
         moveStatus="Completed";
         buttonColor="btn-success";
     }
     newTask.innerHTML=`
         <div class="card-body">
-            <h5 class="card-title">${title}</h5>
-            <p class="card-text">${description}</p>
+            <div class="text-center text-white rounded-1 mb-3 ${task.priority}-priority" id='priority'>${task.priority}</div>
+            <h5 class="card-title">${task.title}</h5>
+            <p class="card-text">${task.description}</p>
             <div class="action-buttons d-flex justify-content-around">
                 <button class="btn move-btn ${buttonColor}">Move To ${moveStatus}</button>
                 <button class="btn btn-danger delete-btn">Delete</button>
@@ -78,15 +87,15 @@ function addTaskToDom(title,description,status,id) {
     });
     const moveBtn = newTask.querySelector('.move-btn');
     moveBtn.addEventListener('click', function () {
-        if (status=="Completed") {
-            status="Pending";
+        if (task.status=="Completed") {
+            task.status="Pending";
             moveStatus="Completed";
             buttonColor="btn-success";
             newTask.querySelector('.move-btn').classList.remove("btn-outline-warning");
             parent=document.getElementById('pending-tasks');
         }
         else {
-            status="Completed";
+            task.status="Completed";
             moveStatus="Pending";
             buttonColor="btn-outline-warning";
             newTask.querySelector('.move-btn').classList.remove("btn-success");
@@ -95,11 +104,7 @@ function addTaskToDom(title,description,status,id) {
         newTask.remove();
         newTask.querySelector('.move-btn').classList.add(buttonColor);
         newTask.querySelector('.move-btn').innerText=`Move To ${moveStatus}`;
-        setDoc(doc(db, "tasks", id), {
-                    title: title,
-                    description: description,
-                    status: status
-                });
+        setDoc(doc(db, "tasks", id),task);
         parent.appendChild(newTask);
     });
     newTask.addEventListener('dragstart', function(event) {
@@ -133,28 +138,21 @@ function dragoverHandler(event) {
 function dropHandler(event) {
     event.preventDefault();
     const data = event.dataTransfer.getData("text");
-    const task = document.getElementById(data);
-    if (this.contains(task)) {
+    const droppedTask = document.getElementById(data);
+    if (this.contains(droppedTask)) {
         return;
     }
-    const taskId = task.querySelector('.card-title').innerText;
-    const taskDescription = task.querySelector('.card-text').innerText;
-    let taskStatus;
-    if (task.classList.contains('Pending-task')) {
-        taskStatus = "Completed";
-    }
-    else if (task.classList.contains('Completed-task')) {
-        taskStatus = "Pending";
+    let task = {
+        title: droppedTask.querySelector('.card-title').innerText,
+        description: droppedTask.querySelector('.card-text').innerText,
+        status: droppedTask.classList.contains('Pending-task') ? "Completed" : "Pending",
+        priority: droppedTask.querySelector('#priority').innerText    
     }
 
-    task.remove();
-    addTaskToDom(taskId,taskDescription,taskStatus,data);
+    droppedTask.remove();
+    addTaskToDom(task,data);
     deleteDoc(doc(db, "tasks", data));
-    setDoc(doc(db, "tasks", data), {
-        title: taskId,
-        description: taskDescription,
-        status: taskStatus
-    });
+    setDoc(doc(db, "tasks", data), task);
 }
 
 const app = initializeApp(firebaseConfig);
