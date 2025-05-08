@@ -19,6 +19,9 @@ body {
     padding: 0.7rem;
     margin-bottom: 1rem;
 }
+.card .Pending-task, .card .Completed-task{
+    cursor: grabbing;
+}
 .task-list,.new-task{
     width: 20rem;
 }
