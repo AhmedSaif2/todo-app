@@ -112,16 +112,11 @@ function addTaskToDom(task,id) {
     });
 }
 
-function searchTasks(event,searchId,status) {
+function searchTasks(event) {
     event.preventDefault();
-    let searchText = document.getElementById(searchId).getElementsByTagName('input')[0].value.toLowerCase();
-    let tasks;
-    if (status=="Completed") {
-        tasks = document.getElementById('completed-tasks').getElementsByClassName('card-title');
-    }
-    else if (status=="Pending") {
-        tasks= document.getElementById('pending-tasks').getElementsByClassName('card-title');
-    }
+    let status = this.id.includes('completed') ? 'completed' : 'pending';
+    let searchText = this.parentElement.querySelector('input').value.toLowerCase();
+    let tasks = document.getElementById(`${status}-tasks`).getElementsByClassName('card-title');
     for (const element of tasks) {
         let taskTitle = element.innerText.toLowerCase();
         if (taskTitle.includes(searchText)) {
@@ -155,25 +150,44 @@ function dropHandler(event) {
     setDoc(doc(db, "tasks", data), task);
 }
 
+function sortByPriority() {
+    let status = this.id.includes('completed') ? 'completed' : 'pending';
+    let parent= document.getElementById(`${status}-tasks`);
+    let tasks= parent.getElementsByClassName('card');
+    let priorities= {
+        "high": 1,
+        "medium": 2,
+        "low": 3
+    };
+    let sortedTasks = Array.from(tasks).sort((a, b) => {
+        let priorityA = priorities[a.querySelector('#priority').innerText.toLowerCase()];
+        let priorityB = priorities[b.querySelector('#priority').innerText.toLowerCase()];
+        return priorityA - priorityB;
+    });
+    
+    parent.innerHTML = "";
+    for (let i = 0; i < sortedTasks.length; i++) {
+        parent.appendChild(sortedTasks[i]);
+    }
+}
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 document.getElementById('task-form').addEventListener('submit', addTask);
-document.getElementById('completed-search').addEventListener('submit', function(event) {
-    searchTasks(event, 'completed-search','Completed');
+
+document.querySelectorAll('.search').forEach(function (element) {
+    element.addEventListener('click', searchTasks);
 });
 
-document.getElementById('pending-search').addEventListener('submit', function(event) {
-    searchTasks(event,'pending-search', 'Pending');
+document.querySelectorAll('.sort').forEach(function (element) {
+    element.addEventListener('click',sortByPriority);
 });
 
-let pending = document.getElementById('pending-container');
-pending.addEventListener('dragover', dragoverHandler);
-pending.addEventListener('drop', dropHandler);
-
-let completed = document.getElementById('completed-container');
-completed.addEventListener('dragover', dragoverHandler);
-completed.addEventListener('drop', dropHandler);
+document.querySelectorAll('.tasks-container').forEach(function (element) {
+    element.addEventListener('dragover', dragoverHandler);
+    element.addEventListener('drop', dropHandler);
+});
 
 fetchTasks();
 

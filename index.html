@@ -20,38 +20,44 @@
         </div>
     </nav>
     <div class="container d-flex flex-wrap justify-content-between">
-        <div id="pending-container">
+        <div class="tasks-container" id="pending-container">
             <div class="card task-list">
                 <div class="card-body mb-3">
-                    <h2 class="text-warning">Pending</h2>
-                    <div>
-                        <form class="search-form" id="pending-search">
-                            <div class="border rounded-1 bg-white d-flex mb-3">
-                                <input type="text" class="form-control shadow-none border-0" name="title" placeholder="Search...">
-                                <button class="border-0 rounded-1 bg-white" type="submit"><i class="bi bi-search"></i></button>
-                            </div>
-                        </form>
+                    <h2 class="text-center text-warning">Pending</h2>
+                    <div class="search-form d-flex justify-content-between mb-3" id="pending-search">
+                        <div class="border rounded-1 bg-white d-flex">
+                            <input type="text" class="form-control shadow-none border-0" name="title" placeholder="Search...">
+                            <button class="border-0 rounded-1 bg-white search" id="pending-search"><i class="bi bi-search"></i></button>
+                        </div>
+                        <div  class="border rounded-1 bg-white d-flex">
+                            <button class="border-0 rounded-1 bg-white sort" id="pending-sort" data-bs-toggle="tooltip" title="sort by priority">
+                                <i class="bi bi-sort-up"></i>
+                            </button>
+                        </div>
                     </div>
                     <div id="pending-tasks">
-        <!--                 Add pending tasks here-->
+                        <!--                 Add pending tasks here-->
                     </div>
                 </div>
             </div>
         </div>
-        <div id="completed-container">
+        <div class="tasks-container" id="completed-container">
             <div class="card task-list">
                 <div class="card-body mb-3">
-                    <h2 class="text-success">Completed</h2>
-                    <div>
-                        <form class="search-form" id="completed-search">
-                            <div class="border rounded-1 bg-white d-flex mb-3">
-                                <input type="text" class="form-control shadow-none border-0" name="title" placeholder="Search...">
-                                <button class="border-0 rounded-1 bg-white" type="submit"><i class="bi bi-search"></i></button>
-                            </div>
-                        </form>
+                    <h2 class="text-center text-success">Completed</h2>
+                    <div class="search-form d-flex justify-content-between mb-3">
+                        <div class="border rounded-1 bg-white d-flex">
+                            <input type="text" class="form-control shadow-none border-0" name="title" placeholder="Search...">
+                            <button class="border-0 rounded-1 bg-white search" id="completed-search"><i class="bi bi-search"></i></button>
+                        </div>
+                        <div  class="border rounded-1 bg-white d-flex">
+                            <button class="border-0 rounded-1 bg-white sort" id="completed-sort" data-bs-toggle="tooltip" title="sort by priority">
+                                <i class="bi bi-sort-up"></i>
+                            </button>
+                        </div>
                     </div>
                     <div id="completed-tasks">
-                        <!--                 Add your pending tasks here-->
+                        <!--                 Add completed tasks here-->
                     </div>
                 </div>
             </div>
@@ -59,7 +65,7 @@
         <div>
             <form method="post" class="card new-task" id="task-form">
                 <div class="card-body mb-3">
-                    <h2>New Task</h2>
+                    <h2 class="text-center">New Task</h2>
                     <input type="text" class="form-control shadow-none mb-3" name="title" placeholder="Enter task title">
                     <textarea class="form-control shadow-none mb-3" name="description" placeholder="Enter task description" rows="3"></textarea>
                     <select class="form-select shadow-none mb-3" name="status" >
