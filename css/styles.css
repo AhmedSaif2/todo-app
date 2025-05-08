@@ -19,8 +19,10 @@ body {
     padding: 0.7rem;
     margin-bottom: 1rem;
 }
-.card .Pending-task, .card .Completed-task{
+.card .Pending-task:hover , .card .Completed-task:hover{
     cursor: grabbing;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 .task-list,.new-task{
     width: 20rem;
